@@ -75,7 +75,6 @@ def detect_worker(input_q, output_q):
 
         # 检查帧对象是二维数组（视频）还是一维数组（网络摄像头）
         if len(frame) == 2:
-            # output_q.put(frame[0])
             frame_rgb = cv2.cvtColor(frame[1], cv2.COLOR_BGR2RGB)
             output_q.put((frame[0], detect_objects(frame_rgb, session, detection_graph)))
         else:

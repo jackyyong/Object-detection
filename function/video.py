@@ -17,8 +17,8 @@ def video(args):
         logger = multiprocessing.log_to_stderr()
         logger.setLevel(multiprocessing.SUBDEBUG)
 
-    print(" --> queue_size=", args["queue_size"])
-    print(" --> num_workers=", args["num_workers"])
+    print(" --> 队列大小=", args["queue_size"])
+    print(" --> 工作线程数量=", args["num_workers"])
 
     # 多处理：初始化输入输出队列，输出优先级队列和工作进程池
     input_q = Queue(maxsize=args["queue_size"])
@@ -78,13 +78,13 @@ def video(args):
 
         # 检查输出队列不是空的
         if not output_q.empty():
-            # 恢复输出队列中的已处理帧，进入优先队列
+            # 恢复输出队列中的已处理帧，进入优先队列(第二个输出队列)
             output_pq.put(output_q.get())
             if firstTreatedFrame:
                 print(" --> 恢复第一个已处理的帧.\n")
                 firstTreatedFrame = False
 
-        # 检查优先队列是不是空的
+        # 检查优先队列(第二个输出队列)是不是空的
         if not output_pq.empty():
             prior, output_frame = output_pq.get()
             if prior > countWriteFrame:
@@ -112,6 +112,7 @@ def video(args):
         print(
             "读取帧: %-3i %% -- 写入帧: %-3i %%" % (int(countReadFrame / nFrame * 100), int(countWriteFrame / nFrame * 100)),
             end='\r')
+
         if ((not ret) & input_q.empty() & output_q.empty() & output_pq.empty()):
             break
 
