@@ -37,7 +37,7 @@ def video(args):
 
     # 定义输出编解码器并创建VideoWriter对象
     if args["output"]:
-        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter('outputs/{}.mp4'.format(args["output_name"]),
                               fourcc, videoCapture.get(cv2.CAP_PROP_FPS),
                               (int(videoCapture.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -72,7 +72,6 @@ def video(args):
             if ret:
                 input_q.put((int(videoCapture.get(cv2.CAP_PROP_POS_FRAMES)), frame))
                 countReadFrame = countReadFrame + 1
-                print(" --> 读取第", countReadFrame, "帧完成")
                 if firstReadFrame:
                     print(" --> 从视频文件读取第一帧,传递给输入队列。\n")
                     firstReadFrame = False

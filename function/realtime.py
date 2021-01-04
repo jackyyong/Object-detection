@@ -34,7 +34,7 @@ def realtime(args):
 
     # 定义输出编解码器并创建VideoWriter对象
     if args["output"]:
-        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter('outputs/{}.mp4'.format(args["output_name"]), fourcc, vs.getFPS()/args["num_workers"], (vs.getWidth(), vs.getHeight()))
 
     # 开始读取和处理视频流

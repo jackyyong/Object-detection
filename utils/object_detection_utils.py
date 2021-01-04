@@ -56,8 +56,6 @@ def detect_objects(image_np, session, detection_graph):
 # input_q 输入队列
 # output_q 输出队列
 def detect_worker(input_q, output_q):
-    print('启动工作线程', multiprocessing.current_process().name)
-
     # 将一个（冻结的）Tensorflow模型加载到内存中。
     detection_graph = tf.Graph()
     with detection_graph.as_default():
