@@ -1,6 +1,6 @@
 from __future__ import print_function
 from utils.app_utils import *
-from utils.objDet_utils import *
+from utils.object_detection_utils import *
 import argparse
 import multiprocessing
 from multiprocessing import Queue, Pool
@@ -8,64 +8,63 @@ import cv2
 
 def realtime(args):
     """
-    Read and apply object detection to input real time stream (webcam)
+    读取并在输入的实时摄像头视频流上应用对象检测
     """
 
-    # If display is off while no number of frames limit has been define: set diplay to on
+    # 如果在没有定义帧数限制的情况下关闭了显示：将显示设置为开
     if((not args["display"]) & (args["num_frames"] < 0)):
         print("\nSet display to on\n")
         args["display"] = 1
 
-    # Set the multiprocessing logger to debug if required
+    # 如果需要，将multiprocessing日志级别设置为debug
     if args["logger_debug"]:
         logger = multiprocessing.log_to_stderr()
         logger.setLevel(multiprocessing.SUBDEBUG)
 
-    # Multiprocessing: Init input and output Queue and pool of workers
+    # multiprocessing：初始化输入和输出队列和工作池
     input_q = Queue(maxsize=args["queue_size"])
     output_q = Queue(maxsize=args["queue_size"])
-    pool = Pool(args["num_workers"], worker, (input_q,output_q))
+    pool = Pool(processes=args["num_workers"],
+                initializer=detect_worker,
+                initargs=(input_q, output_q))
 
-    # created a threaded video stream and start the FPS counter
+    # 创建一个线程化视频流并启动了FPS计数器
     vs = WebcamVideoStream(src=args["input_device"]).start()
     fps = FPS().start()
 
-    # Define the output codec and create VideoWriter object
+    # 定义输出编解码器并创建VideoWriter对象
     if args["output"]:
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('outputs/{}.avi'.format(args["output_name"]),
-                              fourcc, vs.getFPS()/args["num_workers"], (vs.getWidth(), vs.getHeight()))
+        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        out = cv2.VideoWriter('outputs/{}.mp4'.format(args["output_name"]), fourcc, vs.getFPS()/args["num_workers"], (vs.getWidth(), vs.getHeight()))
 
-
-    # Start reading and treating the video stream
+    # 开始读取和处理视频流
     if args["display"] > 0:
         print()
         print("=====================================================================")
-        print("Starting video acquisition. Press 'q' (on the video windows) to stop.")
+        print("开始视频采集。 按\"q\"（在视频窗口上）退出。")
         print("=====================================================================")
         print()
 
     countFrame = 0
     while True:
-        # Capture frame-by-frame
+        # 逐帧捕获
         ret, frame = vs.read()
         countFrame = countFrame + 1
         if ret:
             input_q.put(frame)
             output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
 
-            # write the frame
+            # 写入帧
             if args["output"]:
                 out.write(output_rgb)
 
-            # Display the resulting frame
+            # 显示结果帧
             if args["display"]:
-                ## full screen
+                ## 全屏显示
                 if args["full_screen"]:
-                    cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
-                    cv2.setWindowProperty("frame",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-                cv2.imshow("frame", output_rgb)
-
+                    cv2.namedWindow("Webcam Object Detection", cv2.WND_PROP_FULLSCREEN)
+                    cv2.setWindowProperty("Webcam Object Detection",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+                cv2.imshow("Webcam Object Detection", output_rgb)
                 fps.update()
             elif countFrame >= args["num_frames"]:
                 break
@@ -76,7 +75,7 @@ def realtime(args):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # When everything done, release the capture
+    # 结束后,释放capture
     fps.stop()
     pool.terminate()
     vs.stop()

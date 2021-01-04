@@ -1,0 +1,5 @@
+numpy==1.18.5
+opencv-python==3.4.1.15
+tensorflow==1.15.4
+tensorflow-object-detection-api==0.1.1
+protobuf==3.6.1
